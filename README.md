@@ -1,5 +1,5 @@
 # Massive File Renamer
-A web app that can be used to build a batche file that will massively rename your file names.
+A web app that can be used to build a script file that will massively rename your file names.
 
 While developing this, the aim was to learn and to play a bit with the HTML5 File API + drag and drop features.
 Due to security reasons, the File API can't rename files by itself.
