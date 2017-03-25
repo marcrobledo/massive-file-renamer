@@ -5,3 +5,7 @@ index.html
 massive-file-renamer.css
 massive-file-renamer.js
 massive-file-renamer.png
+
+# force these files to be loaded in network
+NETWORK:
+*
