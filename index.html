@@ -1,96 +1,96 @@
 <!DOCTYPE html>
-<html manifest="massive-file-renamer.appcache">
+<html>
 <head>
 	<title>Massive file renamer</title>
 	<meta http-equiv="content-Type" content="text/html; charset=UTF-8"/>
-	<meta name="description" content="This small web app allows you to rename many files at once using HTML5 technologies."/>
-	<meta name="keywords" content="massive, file, renamer, html5"/>
+	<meta name="description" content="This web app allows you to rename many files at once using HTML5 technologies."/>
+	<meta name="keywords" content="massive, file, renamer, html5, webapp, online"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-	<link rel="shortcut icon" href="./massive-file-renamer.png"/>
-	<!-- <link type="text/css" rel="stylesheet" href="../_webapps/webapps.min.css" media="all"/> -->
+	<link rel="shortcut icon" href="./favicon.png"/>
 	<link type="text/css" rel="stylesheet" href="./massive-file-renamer.css" media="all"/>
 	<script type="text/javascript" src="./massive-file-renamer.js"></script>
 </head>
+
 <body>
+<div id="wrapper">
+
 
 <!-- HEADER -->
-<div id="header">
-	<h1>Massive file renamer</h1>
+<div id="topbar">
+	<h1><img src="icon.png" id="icon"/> Massive file renamer</h1>
 	<h2>
 		by <a href="/" class="author">Marc Robledo</a>
-		<a href="https://github.com/marcrobledo/massive-file-renamer/" target="_blank" class="button"><span class="sprite github"></span> See on GitHub</a>
-		<a href="https://www.paypal.me/marcrobledo/5" target="_blank" rel="nofollow" class="donate button"><span class="sprite heart"></span> Donate</a>
+		<a href="https://github.com/marcrobledo/massive-file-renamer/" target="_blank" class="h2-button github"><span class="icon github"></span> See on GitHub</a>
+		<a href="https://www.paypal.me/marcrobledo/5" target="_blank" rel="nofollow" class="h2-button donate"><span class="icon donate"></span> Donate</a>
 	</h2>
-</div>
 
-
-
-<!-- CARDS -->
-<div id="cards">
-	<div class="card card-notice text-center card-yellow">
-		This web app builds a batch file that will massively rename your files
-		<button onclick="MarcDialogs.open('about')" class="colored transparent with-icon icon5">More</button>
-
-	</div>
-
-	<div class="card card-red">
-		<h3>Files</h3>
-
-		<table id="files" style="display:none">
-			<thead><tr><th>Old name</th><th style="min-width: 60%">New name</th></tr></thead>
-			<tbody id="fileList"></tbody>
-		</table>
-
-		<div id="drop-message" class="simple-drop-message">Drag &amp; drop files anywhere</div>
-
-		<div class="buttons">
-			<button onclick="resetFiles()" class="with-icon icon0">Reset file list</button>
-			<button class="colored blue with-icon icon9" onclick="openScript()">Export</button>
+	<div id="toolbar">
+		<div class="row">
+			<div class="twelve columns">
+				Rename actions:
+				<ul id="actions"></ul>
+				<button id="button-addaction"><span class="icon pencil"></span> Add action</button>
+			</div>
 		</div>
-	</div>
 
-	<div class="card card-green">
-		<h3>Filters</h3>
-		<ul id="filters"></ul>
-		<div class="buttons">
-			<button onclick="MarcDialogs.open('addfilter')" class="with-icon icon1">Add filter</button>
-		</div>
 	</div>
 </div>
 
-<div id="dialog-about" class="dialog">
-	<b>Usage:</b><br/>
-	<ol>
-		<li>Drop the files you want to rename in this window</li>
-		<li>Create your own rename filters below</li>
-		<li>Export batch file</li>
-	</ol>
+<!-- CONTENT -->
+<div id="content">
+	<table style="display:none">
+		<thead>
+			<tr>
+				<th>Old filename</th>
+				<th>New filename</th>
+			</tr>
+		</thead>
 
-	<div class="buttons">
-		<button onclick="MarcDialogs.close()">Accept</button>
-	</div>
+		<tbody id="file-list"></tbody>
+	</table>
+
+	<div id="drop-message" class="drop-zone">Drag and drop files to be renamed</div>
 </div>
 
+<!-- BOTTOM TOOLBAR -->
+<div id="toolbar-bottom">
+	<button onclick="resetFiles()"><span class="icon new"></span> Reset file list</button>
+	<button onclick="el('input-files').click()"><span class="icon add"></span> Add files</button>
+	<button onclick="el('input-dir').click()"><span class="icon folder"></span> Add directory</button>
+	<hr/>
+	<button onclick="openDialogExport()"><span class="icon save"></span> Export</button>
 
+	<!-- <form id="form"> -->
+	<input id="input-files" type="file" style="display:none;" multiple onchange="parseFiles(this.files)"/>
+	<input id="input-dir" type="file" style="display:none;" webkitdirectory directory onchange="parseFiles(this.files)"/>
+	<!-- </form> -->
+</div>
+
+</div> <!-- end wrapper -->
+
+
+<!-- TOOLTIP+DIALOGS -->
+<div id="tooltip"></div>
 <div id="dialog-export" class="dialog">
-	<div class="text-center">
-		Format: <input type="radio" name="format" checked id="format-bat" onchange="generateScript()"/><label for="format-bat">.bat</label> <input type="radio" name="format" id="format-sh" onchange="generateScript()"/><label for="format-sh">.sh</label>
+	<div class="row">
+		<div class="twelve columns">Format:
+			<input type="radio" name="format" checked id="format-bat" onchange="generateScript()"/><label for="format-bat">.bat</label>
+			<input type="radio" name="format" id="format-sh" onchange="generateScript()"/><label for="format-sh">.sh</label>
+		</div>
 	</div>
-	<textarea id="export-textarea" readonly="readonly" rows="20" class="full-width"></textarea>
+	<div class="row">
+		<div class="twelve columns">
+			<textarea id="export-textarea" readonly="readonly" rows="20" class="full-width"></textarea>
+		</div>
+	</div>
+
 	<div class="buttons">
-		<button class="with-icon icon3" onclick="MarcDialogs.close()">Cancel</button>
-		<button class="colored blue with-icon icon9" onclick="exportAsFile()">Export as file...</button>
+		<button onclick="exportAsFile()" class="colored">Export as file</button>
+		<button onclick="copyToClipboard()">Copy to clipboard</button>
+		<button onclick="MarcDialogs.close()">Cancel</button>
 	</div>
 </div>
 
-<div id="dialog-addfilter" class="dialog text-center">
-	<button class="full-width colored blue" onclick="addFilter(new FilterReplace());MarcDialogs.close()">Replace</button>
-	<button class="full-width" onclick="addFilter(new FilterInsert());MarcDialogs.close()">Insert</button>
-	<button class="full-width" onclick="addFilter(new FilterDelete());MarcDialogs.close()">Delete</button>
-	<button class="full-width" onclick="addFilter(new FilterEnumerate());MarcDialogs.close()">Enumerate</button>
-	<button class="full-width" onclick="addFilter(new FilterLowerCase());MarcDialogs.close()">Lowercase</button>
-	<button class="full-width" onclick="addFilter(new FilterClean());MarcDialogs.close()">Clean</button>
-</div>
 
 
 </body></html>
