@@ -6,9 +6,10 @@
 	<meta name="description" content="This web app allows you to rename many files at once using HTML5 technologies."/>
 	<meta name="keywords" content="massive, file, renamer, html5, webapp, online"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-	<link rel="shortcut icon" href="./favicon.png"/>
-	<link type="text/css" rel="stylesheet" href="./massive-file-renamer.css" media="all"/>
-	<script type="text/javascript" src="./massive-file-renamer.js"></script>
+	<link rel="shortcut icon" href="./app/favicon.png"/>
+	<link type="text/css" rel="stylesheet" href="./app/style.css" media="all"/>
+	<script type="text/javascript" src="./app/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript" src="./app/script.js"></script>
 </head>
 
 <body>
@@ -17,28 +18,29 @@
 
 <!-- HEADER -->
 <div id="topbar">
-	<h1><img src="icon.png" id="icon"/> Massive file renamer</h1>
+	<h1><img src="./app/assets/icon.png" id="icon"/> Massive file renamer</h1>
 	<h2>
 		by <a href="/" class="author">Marc Robledo</a>
-		<a href="https://github.com/marcrobledo/massive-file-renamer/" target="_blank" class="h2-button github"><span class="icon github"></span> See on GitHub</a>
-		<a href="https://www.paypal.me/marcrobledo/5" target="_blank" rel="nofollow" class="h2-button donate"><span class="icon donate"></span> Donate</a>
+		<a href="https://github.com/marcrobledo/massive-file-renamer/" target="_blank" class="h2-button github"><img src="app/assets/icon_github.svg" class="icon" /> See on GitHub</a>
+		<a href="https://www.paypal.me/marcrobledo/5" target="_blank" rel="nofollow" class="h2-button donate"><img src="app/assets/icon_heart.svg" class="icon" /> Donate</a>
 	</h2>
 
 	<div id="toolbar">
 		<div class="row">
 			<div class="twelve columns">
+				<button onclick="if(confirm('Do you want to reset the file list?')) resetFiles()" title="Reset file list"><img src="app/assets/icon_reset.svg" class="icon" /></button>
 				Rename actions:
 				<ul id="actions"></ul>
-				<button id="button-addaction"><span class="icon pencil"></span> Add action</button>
+				<button id="button-new"><img src="app/assets/icon_add.svg" class="icon" /> Add action</button>
+				<button onclick="openDialogExport()" id="button-export"><img src="app/assets/icon_download.svg" class="icon" /> Export</button>
 			</div>
 		</div>
-
 	</div>
 </div>
 
 <!-- CONTENT -->
 <div id="content">
-	<table style="display:none">
+	<table id="table" class="hide">
 		<thead>
 			<tr>
 				<th>Old filename</th>
@@ -46,41 +48,107 @@
 			</tr>
 		</thead>
 
-		<tbody id="file-list"></tbody>
+		<tbody id="tbody"></tbody>
 	</table>
 
-	<div id="drop-message" class="drop-zone">Drag and drop files to be renamed</div>
+	<div id="drop-message" class="drop-zone">
+		<div class="big">Drag and drop files to be renamed</div>
+		<div class="small">or <span class="clickable" onclick="$('#input-files').click()">browse and choose files</span> from your computer</div>
+	</div>
 </div>
 
-<!-- BOTTOM TOOLBAR -->
-<div id="toolbar-bottom">
-	<button onclick="resetFiles()"><span class="icon new"></span> Reset file list</button>
-	<button onclick="el('input-files').click()"><span class="icon add"></span> Add files</button>
-	<button onclick="el('input-dir').click()"><span class="icon folder"></span> Add directory</button>
-	<hr/>
-	<button onclick="openDialogExport()"><span class="icon save"></span> Export</button>
 
-	<!-- <form id="form"> -->
-	<input id="input-files" type="file" style="display:none;" multiple onchange="parseFiles(this.files)"/>
-	<input id="input-dir" type="file" style="display:none;" webkitdirectory directory onchange="parseFiles(this.files)"/>
-	<!-- </form> -->
-</div>
-
+<input id="input-files" type="file" class="hide" multiple onchange="parseFiles(this.files)"/>
 </div> <!-- end wrapper -->
 
 
 <!-- TOOLTIP+DIALOGS -->
-<div id="tooltip"></div>
+<div id="tooltip-new" class="tooltip">
+	<div>
+		<button id="button-new-clean">Clean filenames</button>
+		<button id="button-new-insert">Insert characters</button>
+		<button id="button-new-remove">Delete characters</button>
+		<button id="button-new-lowercase">Lowercase</button>
+		<button id="button-new-replace">Replace</button>
+		<button id="button-new-enumerate">Enumerate</button>
+	</div>
+</div>
+<div id="tooltip-insert" class="tooltip">
+	<div class="row">
+		<input id="input-insert-text" oninput="currentAction.text=this.value; updateNames();" class="big" type="text" placeholder="Text to insert" />
+	</div>
+	<div class="row">
+		<div class="eight columns">
+			<label for="input-insert-position">At character position</label>
+		</div>
+		<div class="four columns text-right">
+			<input id="input-insert-position" oninput="this.value=sanitizeNumber(this.value); currentAction.position=parseInt(this.value); updateNames();" class="small text-right" type="text" maxlength="3" />
+		</div>
+	</div>
+	<div class="row">
+		<label><input id="input-insert-end" onchange="currentAction.end=this.checked; updateNames();" type="checkbox" /> At end of filename</label>
+	</div>
+</div>
+<div id="tooltip-remove" class="tooltip">
+	<div class="row">
+		<div class="eight columns"><label for="input-remove-position">At character position</label></div>
+		<div class="four columns text-right"><input id="input-remove-position" oninput="this.value=sanitizeNumber(this.value); currentAction.position=parseInt(this.value); updateNames();" class="small text-right" type="text" maxlength="3" /></div>
+	</div>
+	<div class="row">
+		<div class="eight columns"><label for="input-remove-n">Number of character(s)</label></div>
+		<div class="four columns text-right"><input id="input-remove-n" oninput="this.value=sanitizeNumber(this.value); currentAction.n=parseInt(this.value); updateNames();" class="small text-right" type="text" maxlength="3" /></div>
+	</div>
+	<div class="row">
+		<label><input id="input-remove-end" onchange="currentAction.end=this.checked; updateNames();" type="checkbox" /> At end of filename</label>
+	</div>
+</div>
+<div id="tooltip-replace" class="tooltip">
+	<div class="row">
+		<label>
+			Search
+			<input id="input-replace-search" oninput="currentAction.search=this.value; updateNames();" class="big" type="text">
+		</label>
+	</div>
+	<div class="row">
+		<label><input id="input-replace-regex" onchange="currentAction.regex=this.checked; updateNames();" type="checkbox"> Regular expression</label>
+	</div>
+	<div class="row">
+		<label>
+			Replace with
+			<input id="input-replace-replace" oninput="currentAction.replace=this.value; updateNames();" class="big" type="text">
+		</label>
+	</div>
+	<div class="row">
+		<label><input id="input-replace-all" onchange="currentAction.all=this.checked; updateNames();" type="checkbox"> All occurrences</label>
+	</div>
+</div>
+<div id="tooltip-enumerate" class="tooltip">
+	<div class="row">
+		<label>
+			Starting number
+			<input id="input-enumerate-start" oninput="this.value=sanitizeNumber(this.value); currentAction.start=parseInt(this.value); updateNames();" type="text">
+		</label>
+	</div>
+	<div class="row">
+		<label><input id="input-enumerate-end" onchange="currentAction.end=this.checked; updateNames();" type="checkbox"> Add to end</label>
+	</div>
+</div>
+
+
+
+
+
 <div id="dialog-export" class="dialog">
 	<div class="row">
 		<div class="twelve columns">Format:
-			<input type="radio" name="format" checked id="format-bat" onchange="generateScript()"/><label for="format-bat">.bat</label>
-			<input type="radio" name="format" id="format-sh" onchange="generateScript()"/><label for="format-sh">.sh</label>
+			<label><input type="radio" name="format" id="checkbox-format-bat-ansi" onchange="generateScript()" /> .bat (ANSI)</label>
+			<label><input type="radio" name="format" id="checkbox-format-bat" onchange="generateScript()" checked /> .bat</label>
+			<label><input type="radio" name="format" id="checkbox-format-sh" onchange="generateScript()"/> .sh</label>
 		</div>
 	</div>
 	<div class="row">
 		<div class="twelve columns">
-			<textarea id="export-textarea" readonly="readonly" rows="20" class="full-width"></textarea>
+			<textarea id="export-textarea" readonly="readonly" rows="20"></textarea>
 		</div>
 	</div>
 

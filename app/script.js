@@ -1,117 +1,171 @@
-/* Massive File Renamer HTML5 v20181120 - Marc Robledo 2013-2018 - http://www.marcrobledo.com/license */
+/* Massive File Renamer HTML5 v20220501 - Marc Robledo 2013-2022 - http://www.marcrobledo.com/license */
 
-var ACTIONS=[
-	{
-		defaultTitle:'Clean filenames',
-		action:function(fileName){
-			return fileName.replace(/[àáâä]/g, 'a')
-			.replace(/[èéêë]/g, 'e')
-			.replace(/[ìíîï]/g, 'i')
-			.replace(/[òóôö]/g, 'o')
-			.replace(/[ùúûü]/g, 'u')
-			.replace(/[ÀÁÂÄ]/g, 'A')
-			.replace(/[ÈÉÊË]/g, 'E')
-			.replace(/[ÌÍÎÏ]/g, 'I')
-			.replace(/[ÒÓÔÖ]/g, 'O')
-			.replace(/[ÙÚÛÜ]/g, 'U')
-			.replace(/[çÇ]/g, 'c')
-			.replace(/[ñÑ]/g, 'n')
-			.replace(/&/g, 'and')
-			.replace(/ ?\[(.*?)\]/g, '')
-			.replace(/[\._]/g, ' ')
-			.replace(/ +/g, ' ')
-			.replace(/(^ )|( $)/g, '')
-			/*.replace(/\d+ [a-z]/g, '[A-Z]')*/
-			.replace(/[^a-zA-Z0-9\-_ ]/g, '')
+
+function FilterClean(){}
+FilterClean.prototype.action=function(fileName){
+	return fileName.replace(/[àáâä]/g, 'a')
+		.replace(/[èéêë]/g, 'e')
+		.replace(/[ìíîï]/g, 'i')
+		.replace(/[òóôö]/g, 'o')
+		.replace(/[ùúûü]/g, 'u')
+		.replace(/[ÀÁÂÄ]/g, 'A')
+		.replace(/[ÈÉÊË]/g, 'E')
+		.replace(/[ÌÍÎÏ]/g, 'I')
+		.replace(/[ÒÓÔÖ]/g, 'O')
+		.replace(/[ÙÚÛÜ]/g, 'U')
+		.replace(/[çÇ]/g, 'c')
+		.replace(/[ñÑ]/g, 'n')
+		.replace(/&/g, 'and')
+		.replace(/ ?\[(.*?)\]/g, '')
+		.replace(/[\._]/g, ' ')
+		.replace(/ +/g, ' ')
+		.replace(/(^ )|( $)/g, '')
+		/*.replace(/\d+ [a-z]/g, '[A-Z]')*/
+		.replace(/[^a-zA-Z0-9\-_ ]/g, '')
+}
+FilterClean.prototype.getLabel=function(){
+	return 'Clean filenames';
+}
+FilterClean.prototype.getId=function(){
+	return 'clean';
+}
+
+
+
+
+function FilterInsert(){
+	this.text='';
+	this.position=0;
+	this.end=false;
+}
+FilterInsert.prototype.action=function(fileName){
+	if(!this.end){
+		return fileName.substring(0, this.position) + this.text + fileName.substring(this.position);
+	}else{
+		return fileName.substring(0, fileName.length-this.position) + this.text + fileName.substring(fileName.length-this.position);
+	}
+}
+FilterInsert.prototype.getLabel=function(){
+	return 'Insert text';
+}
+FilterInsert.prototype.getId=function(){
+	return 'insert';
+}
+
+
+
+
+
+function FilterRemove(){
+	this.n=1;
+	this.position=0;
+	this.end=false;
+}
+FilterRemove.prototype.action=function(fileName){
+	if(!this.end){
+		return fileName.substring(0, this.position) + fileName.substring(this.position+this.n);
+	}else{
+		return fileName.substring(0, fileName.length-this.position-this.n) + fileName.substring(fileName.length-this.position);
+	}
+}
+FilterRemove.prototype.getLabel=function(){
+	return 'Remove characters';
+}
+FilterRemove.prototype.getId=function(){
+	return 'remove';
+}
+
+
+
+
+function FilterLowercase(){}
+FilterLowercase.prototype.action=function(fileName){
+	return fileName.replace(/[ÀÁÂÄ]/g, 'a')
+		.replace(/[ÈÉÊË]/g, 'e')
+		.replace(/[ÌÍÎÏ]/g, 'i')
+		.replace(/[ÒÓÔÖ]/g, 'o')
+		.replace(/[ÙÚÛÜ]/g, 'u')
+		.replace(/[Ç]/g, 'ç')
+		.replace(/[Ñ]/g, 'ñ')
+		.toLowerCase()
+}
+FilterLowercase.prototype.getLabel=function(){
+	return 'Lowercase';
+}
+FilterLowercase.prototype.getId=function(){
+	return 'lowercase';
+}
+
+
+function FilterReplace(){
+	this.search='';
+	this.regex=false;
+	this.replace='';
+	this.all=true;
+}
+FilterReplace.prototype.action=function(fileName){
+	if(this.regex){
+		if(this.all){
+			return fileName.replace(new RegExp(this.search, 'g'), this.replace);
+		}else{
+			return fileName.replace(new RegExp(this.search), this.replace);
 		}
-	},{
-		defaultTitle:'Insert characters',
-		params:[
-			{id:'text', label:'String to insert', defaultValue:''},
-			{id:'position', label:'At character position', defaultValue:0},
-			{id:'startAtEnd', label:'At end of filename', defaultValue:false}
-		],
-		action:function(fileName){
-			if(!this.startAtEnd){
-				return [fileName.slice(0, this.position), this.text, fileName.slice(this.position)].join('');
-			}else{
-				return [fileName.slice(0, fileName.length-this.position), this.text, fileName.slice(fileName.length-this.position)].join('');
-			}
-		}
-	},{
-		defaultTitle:'Delete characters',
-		params:[
-			{id:'position', label:'At character position', defaultValue:0},
-			{id:'n', label:'Number of character(s)', defaultValue:1},
-			{id:'startAtEnd', label:'At end of filename', defaultValue:false}
-		],
-		action:function(fileName){
-			if(!this.startAtEnd.checked){
-				return [fileName.slice(0, this.position), fileName.slice(parseInt(this.position)+parseInt(this.n))].join('');
-			}else{
-				// TO-DO!!!
-				return 'end';
-			}
-		}
-	},{
-		defaultTitle:'Lowercase',
-		action:function(fileName){
-			return fileName.toLowerCase();
-		}
-	},{
-		defaultTitle:'Replace',
-		params:[
-			{id:'search', label:'Search', defaultValue:''},
-			{id:'regex', label:'Regular expression', defaultValue:false},
-			{id:'replace', label:'Replace with', defaultValue:''},
-			{id:'all', label:'All occurrences', defaultValue:true}
-		],
-		action:function(fileName){
-			if(this.regex){
-				if(this.all){
-					return fileName.replace(new RegExp(this.search, 'g'), this.replace);
-				}else{
-					return fileName.replace(new RegExp(this.search), this.replace);
+	}else{
+		if(this.search!==''){
+			var replaced=fileName.replace(this.search, this.replace);
+			if(this.all){
+				var loops=0;
+				while(replaced.indexOf(this.search)!==-1 && loops<80){
+					replaced=replaced.replace(this.search, this.replace);
+					loops++;
 				}
-			}else{
-				if(this.search!==''){
-					var replaced=fileName.replace(this.search, this.replace);
-					if(this.all){
-						while(replaced.indexOf(this.search)!==-1){
-							replaced=replaced.replace(this.search, this.replace);
-						}
-					}
-					return replaced;
-				}else{
-					return fileName;
-				}
 			}
-		}
-	},{
-		defaultTitle:'Enumerate',
-		params:[
-			{id:'start', label:'Start with', defaultValue:1},
-			{id:'end', label:'Add to end', defaultValue:false}
-		],
-		action:function(fileName,i){
-			var number=i+parseInt(this.start);
-
-			var padZeroes=files.length.toString(16).length;
-
-			number = '' + number;
-			while (number.length < padZeroes) {
-				number = '0' + number;
-			}
-
-			if(!this.end){
-				return number+' '+fileName;
-			}else{
-				return fileName+' '+number;
-			}
+			return replaced;
+		}else{
+			return fileName;
 		}
 	}
-];
+}
+FilterReplace.prototype.getLabel=function(){
+	return 'Replace';
+}
+FilterReplace.prototype.getId=function(){
+	return 'replace';
+}
 
+
+
+
+
+
+
+
+function FilterEnumerate(){
+	this.start=1;
+	this.end=false;
+}
+FilterEnumerate.prototype.action=function(fileName, i){
+	var number=i+parseInt(this.start);
+
+	var padZeroes=files.length.toString(16).length;
+
+	number = '' + number;
+	while (number.length < padZeroes) {
+		number = '0' + number;
+	}
+
+	if(!this.end){
+		return number+' '+fileName;
+	}else{
+		return fileName+' '+number;
+	}
+}
+FilterEnumerate.prototype.getLabel=function(){
+	return 'Enumerate'
+}
+FilterEnumerate.prototype.getId=function(){
+	return 'enumerate';
+}
 
 
 
@@ -122,17 +176,10 @@ var WEIRD_CHARS='àáâäèéêëìíîïòóôöùúûüÀÁÂÄÈÉÊËÌÍÎ�
 var TRANS_CHARS=[0x2026,0x0020,0x0192,0x201e,0x0160,0x201a,0x02c6,0x2030,0x008d,0x00a1,0x0152,0x2039,0x2022,0x00a2,0x201c,0x201d,0x2014,0x00a3,0x2013,0x0081,0x00b7,0x00b5,0x00b6,0x017d,0x00d4,0x0090,0x00d2,0x00d3,0x00de,0x00d6,0x00d7,0x00d8,0x00e3,0x00e0,0x00e2,0x2122,0x00eb,0x00e9,0x00ea,0x0161,0x2021,0x20ac,0x00a4,0x00a5];
 
 
- 
-/* Shortcuts */
-function addEvent(e,ev,f){e.addEventListener(ev,f,false)}
-function el(e){return document.getElementById(e)}
-function show(e){el(e).style.display='block'}
-function hide(e){el(e).style.display='none'}
-function stopPropagation(e){if(typeof e.stopPropagation!=='undefined')e.stopPropagation();else e.cancelBubble=true}
 
 /* variables */
 var files=[], actions=[];
-
+var currentAction;
 
 
 
@@ -155,12 +202,14 @@ function RenamableFile(name, relativePath){
 
 
 
-	this.tr=document.createElement('tr');
-	this.tr.appendChild(document.createElement('td'));
-	this.tr.appendChild(document.createElement('td'));
-	this.tr.children[0].innerHTML='<small>'+this.relativePath+'</small>'+this.oldName+'<small>'+this.extension+'</small>';
+	this.tr=$('<tr></tr>')
+		.append($('<td></td>')
+			.html('<small>'+this.relativePath+'</small>'+this.oldName+'<small>'+this.extension+'</small>')
+		)
+		.append($('<td></td>'))
+	;
 
-	el('file-list').appendChild(this.tr);
+	$('#tbody').append(this.tr);
 	this.updateNewName();
 }
 
@@ -169,7 +218,7 @@ RenamableFile.prototype.updateNewName=function(){
 	for(var i=0; i<actions.length; i++){
 		this.newName=actions[i].action(this.newName, files.indexOf(this));
 	}
-	this.tr.children[1].innerHTML='<small>'+this.relativePath+'</small>'+this.newName+'<small>'+this.extension+'</small>';
+	$(this.tr).children().last().html('<small>'+this.relativePath+'</small>'+this.newName+'<small>'+this.extension+'</small>');
 }
 
 
@@ -178,24 +227,40 @@ RenamableFile.prototype.updateNewName=function(){
 
 
 
+function refreshUI(){
+	if(files.length){
+		$('#table').show();
+		$('#button-export').prop('disabled', false);
+	}else{
+		$('#table').hide();
+		$('#button-export').prop('disabled', true);
+	}
+
+	if(files.length<15)
+		$('#drop-message').show();
+	else
+		$('#drop-message').hide();
+}
 
 
 
 
 
 
-
+function sanitizeNumber(string){
+	string=string.replace(/[^\d]/g, '').replace(/^0+/,'');
+	if(!string)
+		return '0'; 
+	return string;
+}
 
 
 
 
 function resetFiles(){
-	while(files.length>0){
-		var file=files.pop();
-		el('file-list').removeChild(file.tr);
-	}
-	el('file-list').parentElement.style.display='none';
-	show('drop-message');
+	files=[];
+	$('#tbody').empty().hide();
+	refreshUI();
 }
 
 function updateNames(){
@@ -207,43 +272,58 @@ function updateNames(){
 
 function generateScript(){
 	var txt;
-	if(getScriptFormat() == 'sh'){
+	var format=getScriptFormat();
+	if(format==='sh'){
 		txt='#!/bin/bash\n';
 		for(var i=0; i<files.length; i++)
 			txt+='mv "./'+files[i].relativePath+files[i].oldName+files[i].extension+'" "./'+files[i].relativePath+files[i].newName+files[i].extension+'"\n';
 
 	}else{
-		txt='@echo off\r\n';
-		for(var i=0; i<files.length; i++){
-			txt+='ren "'+files[i].relativePath.replace(/\//g,'\\')+files[i].oldName+files[i].extension+'" "'+files[i].relativePath.replace(/\//g,'\\')+files[i].newName+files[i].extension+'"\r\n';
+		txt='@echo off\n';
+		if(format==='bat'){
+			txt+='chcp 65001\n';
 		}
-		txt+='pause\r\n';
+		for(var i=0; i<files.length; i++){
+			txt+='ren "'+files[i].relativePath.replace(/\//g,'\\')+files[i].oldName+files[i].extension+'" "'+files[i].relativePath.replace(/\//g,'\\')+files[i].newName+files[i].extension+'"\n';
+		}
+		txt+='pause\n';
 		
-
+		if(format==='bat-ansi'){
+			for(var i=0; i<WEIRD_CHARS.length; i++)
+				txt=txt.replace(new RegExp(WEIRD_CHARS[i], 'g'), String.fromCharCode(TRANS_CHARS[i]));
+		}
+		//txt=txt.replace(/\n/g, '\r\n');
 	}
 
-	for(var i=0; i<WEIRD_CHARS.length; i++)
-		txt=txt.replace(new RegExp(WEIRD_CHARS[i], 'g'), String.fromCharCode(TRANS_CHARS[i]));
+	
 
-	el('export-textarea').innerHTML=txt;
+	$('#export-textarea').val(txt);
 }
 function openDialogExport(){
 	generateScript();
 	MarcDialogs.open('export');
 }
 function getScriptFormat(){
-	return el('format-sh').checked?'sh':'bat'
+	var FORMATS=['bat', 'bat-ansi', 'sh'];
+	for(var i=0; i<FORMATS.length; i++){
+		if($('#checkbox-format-'+FORMATS[i]).prop('checked'))
+			return FORMATS[i];
+	}
+	return null;
 }
 
 
 function exportAsFile(){
 	//var blob = new Blob([el('export-textarea').innerHTML], {type: 'application/octet-stream;charset=us-ascii'});
-	var blob = new Blob([el('export-textarea').innerHTML], {type: 'application/octet-stream;charset=utf-8'});
-	saveAs(blob, 'rename.'+getScriptFormat());
+	var scriptText=$('#export-textarea').val().replace(/[\r\n]+/g, '\n');
+	if(/^bat/.test(getScriptFormat()))
+		scriptText=scriptText.replace(/\n/g, '\r\n');
+	var blob = new Blob([scriptText], {type: 'application/octet-stream;charset=utf-8'});
+	saveAs(blob, 'rename_files.'+getScriptFormat().replace(/-\w+$/,''));
 }
 
 function copyToClipboard(){
-	el('export-textarea').select();
+	document.getElementById('export-textarea').select();
 	try{
 		if(document.execCommand('copy'))
 			SimpleSnackbar.set('Copied to clipboard');
@@ -256,198 +336,87 @@ function copyToClipboard(){
 
 
 
-function showTooltip(button, container){
-	el('tooltip').innerHTML='';
-	el('tooltip').appendChild(container);
+function showTooltip(tooltipId, button){
+	$('#tooltip-'+tooltipId).show();
 
-	show('tooltip');
 	var buttonBoundings=button.getBoundingClientRect();
-	var tooltipBoundings=el('tooltip').getBoundingClientRect();
-	el('tooltip').style.top=parseInt(buttonBoundings.top+45)+'px';
-	el('tooltip').style.left=parseInt(buttonBoundings.left+(buttonBoundings.width/2)-(tooltipBoundings.width/2))+'px';
+	var tooltipBoundings=$('#tooltip-'+tooltipId).get(0).getBoundingClientRect();
 
+	$('#tooltip-'+tooltipId)
+		.css('top', Math.floor(buttonBoundings.top+45)+'px')
+		.css('left', Math.floor(buttonBoundings.left+(buttonBoundings.width/2)-(tooltipBoundings.width/2))+'px')
+	;
+	
+	$('#tooltip-'+tooltipId).find('input').first().focus();
 }
-function hideTooltip(){
-	hide('tooltip');
-}
 
+function addAction(newAction, openDialog){
+	var li=$('<li>').append(
+		$('<button></button>')
+			.html(newAction.getLabel())
+			.click(function(evt){
+				evt.stopPropagation();
+				currentAction=newAction;
 
-function clickAction(evt){
-	stopPropagation(evt);
+				var id=newAction.getId();
+				$('.tooltip').hide();
+				if($('#tooltip-'+id).length){
+					for(var prop in currentAction){
+						if(typeof currentAction[prop]==='number' || typeof currentAction[prop]==='string'){
+							$('#input-'+id+'-'+prop).val(currentAction[prop]);
+						}else if(typeof currentAction[prop]==='boolean'){
+							$('#input-'+id+'-'+prop).prop('checked', currentAction[prop]);
+						}
+					}
+					showTooltip(id, this);
+				}
+			})
+			.addClass('action')
+	);
 
-	var actionIndex=-1;
-	for(var i=0; i<actions.length && actionIndex===-1; i++){
-		if(el('actions').children[i]===this.parentElement){
-			actionIndex=i;
-			console.log(i);
-		}
-	}
-	actions[actionIndex].showEdit();
-}
-function addAction(newAction){
-	newAction.li=document.createElement('li');
-	var button=document.createElement('button');
-	button.className='action';
-	button.innerHTML=newAction.defaultTitle;
-	addEvent(button, 'click', clickAction);
-
-	newAction.li.appendChild(button);
-
-	el('actions').appendChild(newAction.li);
+	$('#actions').append(li);
 	actions.push(newAction);
 
 
 
 
-	var removeButton=document.createElement('button');
-	removeButton.action=newAction;
-	removeButton.className='remove';
-	removeButton.innerHTML='&times;';
-	removeButton.title='Remove action';
+	$(li).append(
+		$('<button></button>').
+		html('<img src="app/assets/icon_remove.svg" class="icon icon-remove" />').
+		prop('title','Remove action').
+		addClass('remove').
+		click(function(evt){
+			actions.splice(actions.indexOf(newAction), 1);
+			updateNames();
 
-	addEvent(removeButton, 'click', eventClickRemoveAction);
-	newAction.li.appendChild(removeButton);
-
-
-
-
-
-	updateNames();
-	newAction.showEdit();
-}
+			$(this).parent().remove();
+		})
+	);
 
 
-function eventClickRemoveAction(evt){
-	var actionIndex=actions.indexOf(this.action);
-	el('actions').removeChild(el('actions').children[actionIndex]);
 
-	actions.splice(actionIndex, 1);
-	updateNames();
-}
-
-
-function Action(actionId){
-	this.actionId=actionId;
-	this.defaultTitle=ACTIONS[actionId].defaultTitle;
-	this.action=ACTIONS[actionId].action;
-
-	this.hasParams=(typeof ACTIONS[actionId].params !== 'undefined');
-	if(this.hasParams){
-		for(var i=0; i<ACTIONS[actionId].params.length; i++){
-			this[ACTIONS[actionId].params[i].id]=ACTIONS[actionId].params[i].defaultValue;
-		}
+	if(typeof openDialog==='undefined' || !!openDialog){
+		$(li).children().first().click();
 	}
 
-}
-Action.prototype.showEdit=function(){
-	if(this.hasParams){
-		var container=document.createElement('div');
-		
-		for(var i=0; i<ACTIONS[this.actionId].params.length; i++){
-			var param=ACTIONS[this.actionId].params[i];
-
-
-			var row=document.createElement('div');
-			row.className='row';
-			container.appendChild(row);
-
-			var input=document.createElement('input');
-			input.action=this;
-			input.paramId=param.id;
-
-			var label=document.createElement('label');
-			label.innerHTML=param.label;
-
-			if(typeof this[param.id]==='boolean'){
-				input.type='checkbox';
-				input.checked=this[param.id];
-				addEvent(input, 'change', eventChangeCheckbox)
-				label.htmlFor=input;
-
-				row.appendChild(input);
-				row.appendChild(label);
-			}else{
-				var col1=document.createElement('div');
-				var col2=document.createElement('div');
-
-				input.value=this[param.id];
-				if(typeof this[param.id]==='number'){
-					addEvent(input, 'keyup', eventEditNumericInput);
-					addEvent(input, 'input', eventCleanNumericInput);
-					input.className='mini text-right';
-					col1.className='eight columns';
-					col2.className='four columns text-right';
-				}else{
-					input.className='fw';
-					col1.className='twelve columns';
-					col2.className='twelve columns';
-				}
-				addEvent(input, 'input', eventChangeInput)
-
-				col1.appendChild(label);
-				col2.appendChild(input);
-				row.appendChild(col1);
-				row.appendChild(col2);
-
-				input.type='text';
-			}
-		}
-
-		showTooltip(el('actions').children[actions.indexOf(this)].children[0], container);
-	}else{
-		hideTooltip();
-	}
-}
-function eventChangeCheckbox(evt){
-	this.action[this.paramId]=this.checked;
 	updateNames();
 }
-function eventChangeInput(evt){
-	this.action[this.paramId]=this.value;
-	updateNames();
-}
-function eventCleanNumericInput(evt){
-	this.value=parseInt(this.value.replace(/[^0-9]/g,''));
-
-	if(isNaN(this.value) || this.value<0)
-		this.value=0;
-	else if(this.value>400)
-		this.value=400;
-
-}
-function eventEditNumericInput(evt){
-	this.value=parseInt(this.value.replace(/[^0-9]/g,''));
-
-
-	if(evt.keyCode===38){ //up
-		this.value++
-	}else if(evt.keyCode===40){ //down
-		this.value--
-	}
-
-	if(isNaN(this.value) || this.value<0)
-		this.value=0;
-	else if(this.value>400)
-		this.value=400;
-
-}
-
 
 
 
 var SimpleSnackbar=(function(){
-	var snackbar=document.createElement('snackbar');
+	var snackbar=document.createElement('div');
 	snackbar.id='snackbar';
 
 	var timeout;
 
-	addEvent(window, 'load', function(){
+	$(document).ready(function(){
 		document.body.appendChild(snackbar);
 	});
 	function closeSnackbar(){
 		snackbar.className='';
 	}
-	addEvent(snackbar, 'click', function(){
+	$(snackbar).click(function(){
 		if(timeout)
 			clearTimeout(timeout);
 		closeSnackbar();
@@ -465,31 +434,6 @@ var SimpleSnackbar=(function(){
 	}
 }());
 
-addEvent(window, 'load', function(){
-	addAction(new Action(0));
-
-	MarcDragAndDrop.addGlobalZone(parseFiles, 'Drop files to be renamed here');
-
-	var tooltipNewAction=document.createElement('div');
-	var eventClickNewAction=function(){
-		addAction(new Action(this.actionId));
-	}
-	for(var i=0; i<ACTIONS.length; i++){
-		var button=document.createElement('button');
-		button.actionId=i;
-		button.innerHTML=ACTIONS[i].defaultTitle;
-		addEvent(button, 'click', eventClickNewAction);
-
-		tooltipNewAction.appendChild(button);
-	}
-
-	addEvent(el('button-addaction'), 'click', function(evt){
-		stopPropagation(evt);
-		showTooltip(this, tooltipNewAction);
-	});
-	addEvent(el('tooltip'), 'click', stopPropagation);
-	addEvent(window, 'click', hideTooltip);
-});
 
 
 
@@ -507,14 +451,57 @@ function parseFiles(droppedFiles){
 			var newFile=new RenamableFile(droppedFiles[i].name, droppedFiles[i].webkitRelativePath || false);
 			
 			files.push(newFile);
-			el('file-list').parentElement.style.display='table';
-			hide('drop-message');
 		}
 	}
+	refreshUI();
 }
 
 
 
+
+
+
+
+$(document).ready(function(){
+	if(!/Windows/.test(navigator.userAgent)){
+		$('#checkbox-format-sh').prop('checked', true);
+	}
+	addAction(new FilterClean(), false);
+
+	MarcDragAndDrop.addGlobalZone(parseFiles, 'Drop files to be renamed here');
+
+
+	$('#button-new').click(function(evt){
+		evt.stopPropagation();
+
+		$('.tooltip').hide();
+		showTooltip('new', this);
+	});
+	$('#tooltip-new button').click(function(evt){
+		var id=this.id.replace('button-new-', '');
+		if(id==='clean'){
+			addAction(new FilterClean());
+		}else if(id==='insert'){
+			addAction(new FilterInsert());
+		}else if(id==='remove'){
+			addAction(new FilterRemove());
+		}else if(id==='lowercase'){
+			addAction(new FilterLowercase());
+		}else if(id==='replace'){
+			addAction(new FilterReplace());
+		}else if(id==='enumerate'){
+			addAction(new FilterEnumerate());
+		}
+	});
+	$('.tooltip').click(function(evt){
+		evt.stopPropagation();
+	});
+	$(window).click(function(evt){
+		$('.tooltip').hide();
+	});
+
+	refreshUI();	
+});
 
 
 

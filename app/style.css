@@ -1,4 +1,5 @@
 /* classes */
+.hide{display:none}
 .text-right{text-align:right}
 .hidden{display:none}
 .clickable:hover{cursor:pointer;text-decoration:underline}
@@ -8,9 +9,9 @@
 
 body{
 	font:15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-	background-color:#2d2e2f;
+	background-color:#eeecec;
 	margin:100px 20px 20px;
-	color:#e8ebef;
+	color:#141415;
 	margin:0;
 	
 	-moz-user-select:none;-webkit-user-select: none;-ms-user-select:none;-o-user-select:none;user-select:none
@@ -19,23 +20,13 @@ body{
 
 
 
-span.icon{
+img.icon{
 	display:inline-block;
 	width:16px;
 	height:16px;
 	vertical-align:middle;
-	background-image:url('icons.png');
-	background-size: 160px 16px;
 }
-.icon.donate{background-position: -16px}
-.icon.new{background-position: -32px}
-.icon.add{background-position: -48px}
-.icon.save{background-position: -64px}
-.icon.pencil{background-position: -80px}
-.icon.settings{background-position: -96px}
-.icon.folder{background-position: -112px}
-.icon.trash{background-position: -128px}
-.icon.check{background-position: -144px}
+img.icon.icon-remove{width:12px}
 
 
 
@@ -57,7 +48,8 @@ span.icon{
 
 
 #topbar{
-	background-color:#e74100;
+	background-color:#282422;
+	color:#8c7b73;
 }
 
 
@@ -67,18 +59,32 @@ span.icon{
 
 
 
-button,input{
+
+button,input,select{
 	font-family:inherit;
 	font-size:inherit;
+	box-sizing:border-box;
 }
-input[type=text]{box-sizing:border-box}
+input[type="text"],textarea{
+	border:1px solid #555;
+	border-radius:2px;
+	outline:none;
+}
+input[type="text"].small{width:40px}
+input[type="text"].big{width:260px}
+input[type="text"]:focus,textarea:focus{
+	border-color:#ff7800;
+	box-shadow: #ffb04a 0 0 0px 3px;
+}
+
+
 .dialog button{min-width:120px;background-color:#eee}
 button{
 	font-size:95%;
 	background-color:transparent;
 	border:none;
 	border-radius:2px;
-	padding: 5px 8px;
+	padding: 6px 12px;
 }
 button:hover{
 	background-color:#ddd;
@@ -87,17 +93,12 @@ button:hover{
 button:disabled{opacity:.35}
 button.colored{background-color:#2663d2;color:white}
 button.colored:hover{background-color:#3673e2}
-input.fw,select.fw{
-	box-sizing:border-box;
-	width:100%;
-}
-input.mini{
-	width: 40px
-}
+
 textarea{
 	box-sizing:border-box;
 	width:100%;
 	resize: vertical;
+	font-family:Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, monospace
 }
 
 
@@ -123,7 +124,7 @@ h2{
 	font-weight:normal;
 }
 h2 a{
-	border-bottom: 1px solid #ee7a4c;
+	border-bottom: 1px solid #775446;
 	color:white;
 	text-decoration:none;
 }
@@ -131,24 +132,24 @@ h2 a{
 	border:none;
 	padding: 10px 20px;
 	border-radius: 3px;
-	background-color:#ba3c0c;
+	background-color:#141417;
+	vertical-align:middle;
 }
 .h2-button:hover{
-	background-color:#953814;
+	background-color:#332825;
 }
 .h2-button.donate{
-	background-color:#33a700;
+	background-color:#c1105b;
 }
 .h2-button.donate:hover{
-	background-color:#44c00d;
+	background-color:#db1f6e;
 }
 #toolbar{
-	color:#f69a75;
 	padding: 8px 20px;
 }
 #toolbar button{
 	background-color:transparent;
-	border:1px solid #e36e41;
+	border:1px solid #574238;
 	color:white;
 }
 #toolbar button.action{
@@ -161,7 +162,7 @@ h2 a{
 	border-bottom-left-radius:0px;
 }
 #toolbar button:hover{
-	background-color:#c23d0a;
+	background-color:#3c3431;
 }
 
 
@@ -214,13 +215,14 @@ th{
 	text-transform:uppercase;
 	font-size:80%;
 	text-align:left;
-	background-color:#242526;
+	background-color:#534a46;
+	color: white;
 }
 tbody tr:nth-child(even){
-	background-color:#323335;
+	background-color:#e8e4e4;
 
 }
-tbody small{opacity:.6}
+tbody small{opacity:.35}
 td:nth-child(3){
 	font-size:80%;
 	max-width:300px;
@@ -232,54 +234,67 @@ td:nth-child(5){
 
 #drop-message{
 	text-align:center;
-	border: 1px dashed #e8ebef;
+	border: 3px dashed #d5c8c8;
 	padding: 100px 0;
 	border-radius: 6px;
-	font-size:160%;
 	margin: 60px;
 }
-
-
-#toolbar-bottom{
-	padding: 8px;
-	text-align:center;
+#drop-message .big{
+	font-size:160%;
+	margin-bottom:8px;
 }
-#toolbar-bottom button{
-	border: 1px solid #515559;
-	color:white;
+#drop-message .small{
+	font-size:105%;
 }
-#toolbar-bottom button:hover{
-	background-color:#212223;
+#drop-message .small .clickable{
+	color:#ac4922 
 }
 
-button .icon{margin-right:4px}
 
-#tooltip{
+
+#button-export{
+	margin-left: 10px;
+}
+#button-export:not(:disabled){
+	border-color: #e16224;
+	background-color: #e16224;
+}
+#button-export:not(:disabled):hover{
+	border-color: #ff4700;
+	background-color: #ff4700;
+}
+#button-export:disabled{
+	cursor:not-allowed
+}
+
+
+.tooltip{
 	background-color:white;
 	color:black;
-	padding: 10px;
+	padding: 16px;
 	border-radius: 3px;
 	max-width:300px;
 	position:fixed;
 	z-index:30;
 	box-sizing:border-box;
 	display:none;
+	box-shadow: rgba(0,0,0,.15) 0 1px 3px 1px;
 }
-#tooltip:after{
+.tooltip:after{
 	display:inline-block;
 	width:0;
 	height:0;
 	content:" ";
-    border-bottom: 10px solid white;
-    border-top: 10px solid transparent;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
+	border-bottom: 10px solid white;
+	border-top: 10px solid transparent;
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
 	position:absolute;
 	top:-20px;
 	left:50%;
 	margin-left:-10px;
 }
-#tooltip button{
+.tooltip button{
 	display:block;
 	margin-bottom: 2px;
 	width:100%;
@@ -287,13 +302,14 @@ button .icon{margin-right:4px}
 	background-color:inherit;
 	border:1px solid #e8e8e8;
 }
-#tooltip button:hover{
+.tooltip button:hover{
 	background-color:#f4f4f4;
 }
-#tooltip input[type=text]{
+.tooltip input[type=text]{
 	margin-bottom:3px;
 	padding: 4px;
 }
+.tooltip label{vertical-align:middle}
 
 
 #dialog-export{
@@ -371,7 +387,7 @@ body.dragging-files #drop-message{visibility:hidden !important}
 	bottom:-80px;
 	background-color:white;
 	color: black;
-	box-shadow:rgba(0,0,0,.3)  0 0 12px;
+	box-shadow:rgba(0,0,0,.3) 0 0 12px;
 	padding:20px;
 	width:260px;
 	border-radius:3px;
@@ -443,8 +459,5 @@ body.dragging-files #drop-message{visibility:hidden !important}
 	.h2-button{
 		padding: 4px 6px;
 	}
-
-	#toolbar-bottom button{text-align:center;font-size:85%;}
-	#toolbar-bottom button span{display:block;margin:0 auto 2px;}
 }
 
