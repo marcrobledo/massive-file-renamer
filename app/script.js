@@ -1,4 +1,15 @@
-/* Massive File Renamer HTML5 v20220501 - Marc Robledo 2013-2022 - http://www.marcrobledo.com/license */
+/* Massive File Renamer HTML5 v20220502 - Marc Robledo 2013-2022 - http://www.marcrobledo.com/license */
+
+
+
+/* service worker */
+const FORCE_HTTPS=true;
+if(FORCE_HTTPS && location.protocol==='http:')
+	location.href=window.location.href.replace('http:','https:');
+else if(location.protocol==='https:' && 'serviceWorker' in navigator && window.location.hostname==='www.marcrobledo.com')
+	navigator.serviceWorker.register('/massive-file-renamer/_cache_service_worker.js', {scope: '/massive-file-renamer/'});
+
+
 
 
 function FilterClean(){}
