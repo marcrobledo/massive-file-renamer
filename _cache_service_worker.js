@@ -14,7 +14,7 @@
 */
 
 var PRECACHE_ID='massive-file-renamer';
-var PRECACHE_VERSION='v3b';
+var PRECACHE_VERSION='v3c';
 var PRECACHE_URLS=[
 	'/massive-file-renamer/','/massive-file-renamer/index.html',
 	'/massive-file-renamer/app/favicon.png',

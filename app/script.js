@@ -270,7 +270,7 @@ function sanitizeNumber(string){
 
 function resetFiles(){
 	files=[];
-	$('#tbody').empty().hide();
+	$('#tbody').empty();
 	refreshUI();
 }
 
